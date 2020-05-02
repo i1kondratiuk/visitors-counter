@@ -6,7 +6,8 @@ import (
 
 // UserRepository represents a storage of all existing users
 type UserRepository interface {
-	Get(ID int64) (*entity.User, error)
+	GetById(ID int64) (*entity.User, error)
+	GetByUsername(username string) (*entity.User, error)
 	GetAll() ([]*entity.User, error)
 	Save(user *entity.User) error
 }

@@ -1,14 +1,17 @@
 package web
 
+import (
+	"fmt"
+	"log"
+	"net/http"
+)
 
-// Router returns a http router with endpoints set
-func Router() *gin.Engine {
-	router := gin.Default()
+// Run starts server
+func Run(port int) {
+	log.Printf("Server running at http://localhost:%d/", port)
 
-	router.GET("/users/:id", getUser)
-	router.GET("/users", getUsers)
-	router.POST("/users", addUser)
-	router.GET("/users-match/:id", getUserMatch)
+	new(AuthHandler).AddRoutes()
+	new(UserCounterHandler).AddRoutes()
 
-	return router
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
