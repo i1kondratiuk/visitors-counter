@@ -1,52 +1,81 @@
 package persistence
 
 import (
+	"database/sql"
 	"errors"
+
 	"github.com/i1kondratiuk/visitors-counter/domain/entity"
+	"github.com/i1kondratiuk/visitors-counter/domain/repository"
 )
 
 // UserRepositoryImpl is the implementation of UserRepository
 type UserRepositoryImpl struct {
-	DB map[int64]*entity.User
+	db *sql.DB
 }
 
-// Get returns a user from the database with the id
-func (r *UserRepositoryImpl) Get(id int64) (*entity.User, error) {
-	if r.DB == nil {
-		return nil, errors.New("database error")
-	}
+// UserRepositoryImpl implements the domain UserRepository interface
+var _ repository.UserRepository = &UserRepositoryImpl{}
 
-	if r.DB[id] == nil {
-		return nil, errors.New("user not found")
-	}
-
-	return r.DB[id], nil
+// NewUserRepository returns initialized UserRepositoryImpl
+func NewUserRepository(db *sql.DB) repository.UserRepository {
+	return &UserRepositoryImpl{db: db}
 }
 
-// GetAll return all users stored in database
-func (r *UserRepositoryImpl) GetAll() ([]*entity.User, error) {
-	if r.DB == nil {
-		return nil, errors.New("database error")
-	}
-
-	users := []*entity.User{}
-	for _, user := range r.DB {
-		users = append(users, user)
-	}
-
-	return users, nil
-}
-
-// Save insert a user to database
+// Save saves domain.User to storage
 func (r *UserRepositoryImpl) Save(user *entity.User) error {
 	if user == nil {
 		return errors.New("nil user")
 	}
-	if r.DB == nil {
+	if r.db == nil {
 		return errors.New("database error")
 	}
 
-	user.ID = int64(len(r.DB) + 1)
-	r.DB[user.ID] = user
+	defer r.db.Close()
+
+	_, err := r.db.Query("insert into users (name) values (?)")
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// Get returns a user from the database with the id
+func (r *UserRepositoryImpl) Get(id int64) (*entity.User, error) {
+	if r.db == nil {
+		return nil, errors.New("database error")
+	}
+
+	row, err := r.db.Query("select id, name from users where id=?", id)
+	if err != nil {
+		return nil, err
+	}
+	user := &entity.User{}
+	err = row.Scan(&user.ID, &user.Name)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
+}
+
+// GetAll returns list of domain.User
+func (r *UserRepositoryImpl) GetAll() ([]*entity.User, error) {
+	if r.db == nil {
+		return nil, errors.New("database error")
+	}
+	rows, err := r.db.Query("select id, name from users")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	users := make([]*entity.User, 0)
+	for rows.Next() {
+		user := &entity.User{}
+		err = rows.Scan(&user.ID, &user.Name)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }
