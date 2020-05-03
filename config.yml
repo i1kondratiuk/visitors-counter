@@ -1,7 +1,7 @@
 database:
   driver: mysql
-  host: db-container
+  host: localhost
   name: finres-db
   port: 3306
   user: root
-  password: finres-secret-pw
+  password:
