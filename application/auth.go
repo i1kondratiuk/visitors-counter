@@ -35,8 +35,8 @@ func GetAuthApp() AuthApp {
 func (a *AuthAppImpl) Signup(user *entity.User) error {
 	err := repository.GetAuthRepository().Insert(user)
 
-	if err == nil {
-		return err
+	if err != nil {
+		panic(err.Error())
 	}
 
 	return nil

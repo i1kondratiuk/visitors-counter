@@ -2,6 +2,8 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/i1kondratiuk/visitors-counter/application"
@@ -21,34 +23,98 @@ func (h AuthHandler) AddRoutes() {
 }
 
 func (h AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
-	var u entity.User
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-		Error(w, http.StatusBadRequest, err, "failed to parse request")
-		return
-	}
+	switch r.Method {
+	case "GET":
+		fmt.Fprint(w, signupForm)
+	case "POST":
 
-	if err := h.AuthApp.Signup(&u); err != nil {
-		Error(w, http.StatusInternalServerError, err, "failed to create user")
-		return
-	}
+		name := r.FormValue("name")
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		fmt.Println(">>> name: ", name)
+		fmt.Println(">>> username: ", username)
+		fmt.Println(">>> password: ", password)
 
-	JSON(w, http.StatusCreated, nil)
+		if name == "" || username == "" || password == "" {
+			Error(w, http.StatusBadRequest, errors.New("empty input"), "all fields should bu populated")
+			return
+		}
+		u := entity.User{
+			Name: name,
+			Credentials: value.Credentials{
+				Username: username,
+				Password: password,
+			},
+		}
+
+		h.AuthApp = application.GetAuthApp()
+		if err := h.AuthApp.Signup(&u); err != nil {
+			Error(w, http.StatusInternalServerError, err, "failed to create user")
+			return
+		}
+
+		JSON(w, http.StatusCreated, nil)
+	default:
+		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
+	}
 }
+
+const signupForm = `
+<html>
+  <body>
+    <h1>Signup</h1>
+    <form action="/signup" method="post">
+      <p>
+        <label for="name">Name:</label>
+        <input id="name" type="text" name="name">
+      </p>
+      <p>
+        <label for="username">Username:</label>
+        <input id="username" type="text" name="username">
+      </p>
+      <p>
+        <label for="password">Password:</label>
+        <input in="password" type="text" name="password">
+      </p>
+        <input value="Submit" type="submit">
+    </form>
+  </body>
+</html>
+`
 
 func (h AuthHandler) Signin(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		fmt.Fprint(w, signinForm)
+	case "POST":
+		var c value.Credentials
+		if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+			Error(w, http.StatusBadRequest, err, "failed to parse request")
+			return
+		}
 
-	var c value.Credentials
-	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
-		Error(w, http.StatusBadRequest, err, "failed to parse request")
-		return
+		u, err := h.AuthApp.Signin(&c)
+
+		if err != nil {
+			Error(w, http.StatusNotFound, err, "failed to signin")
+			return
+		}
+
+		JSON(w, http.StatusOK, u)
+	default:
+		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
 	}
-
-	u, err := h.AuthApp.Signin(&c)
-
-	if err != nil {
-		Error(w, http.StatusNotFound, err, "failed to signin")
-		return
-	}
-
-	JSON(w, http.StatusOK, u)
 }
+
+const signinForm = `
+<html>
+  <body>
+    <h1>Signin</h1>
+    <form action="/" method="post" accept-charset="utf-8">
+      <input type="text" name="aut" value="Author's Name: " id="aut">
+      <input type="text" name="quo" value="Type a string..." id="quo">
+      <input type="submit" value="Submit Quote">
+    </form>
+  </body>
+</html>
+`
