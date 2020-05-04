@@ -1,13 +1,13 @@
 package value
 
-type VisitType int
+type VisitType string
 
 const (
-	URI VisitType = iota
+	ResourcePath VisitType = "Resource Path"
 )
 
 // Visit represents a visit
 type Visit struct {
-	Type    VisitType
-	Value   string
+	Type  VisitType
+	Value string
 }

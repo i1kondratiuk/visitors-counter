@@ -38,9 +38,11 @@ func (r *AuthRepositoryImpl) Insert(user *entity.User) error {
 		return errors.New("database error")
 	}
 
-	defer r.db.Close()
-
-	insertedUser, err := r.db.Query(fmt.Sprintf("INSERT INTO user (name, username, password) VALUES (%q, %q, %q)", user.Name, user.Credentials.Username, user.Credentials.Password))
+	insertedUser, err := r.db.Query(
+		"INSERT INTO user (name, username, password) VALUES (?, ?, ?)",
+		user.Name,
+		user.Credentials.Username,
+		user.Credentials.Password)
 
 	if err != nil {
 		return err

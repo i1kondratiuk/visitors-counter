@@ -1,13 +1,14 @@
 package application
 
 import (
-	"github.com/i1kondratiuk/visitors-counter/domain/entity"
 	"github.com/i1kondratiuk/visitors-counter/domain/repository"
+	"github.com/i1kondratiuk/visitors-counter/domain/value"
 )
 
 // UsersCounter represents UsersCounter application to be called by interface layer
 type UsersCounterApp interface {
-	GetUsers() ([]*entity.User, error)
+	RegisterVisit(visit value.Visit, username string) error
+	GetNumberOfUsersVisitedPage() (int, error)
 }
 
 // UsersCounterImpl is the implementation of UsersCounter
@@ -28,7 +29,22 @@ func GetUsersCounter() UsersCounterApp {
 // UsersCounterImpl implements the UsersCounter interface
 var _ UsersCounterApp = &UsersCounterAppImpl{}
 
-// GetUsers returns users stored in repository
-func (a *UsersCounterAppImpl) GetUsers() ([]*entity.User, error) {
-	return repository.GetUserRepository().GetAll()
+func (a *UsersCounterAppImpl) RegisterVisit(visit value.Visit, username string) error {
+	err := repository.GetVisitLogRepository().RegisterVisit(visit, username)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *UsersCounterAppImpl) GetNumberOfUsersVisitedPage() (int, error) {
+	logs, err := repository.GetVisitLogRepository().GetByTypeAndUsername(value.ResourcePath)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return len(logs), err
 }

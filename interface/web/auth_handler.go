@@ -53,7 +53,7 @@ func (h AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		JSON(w, http.StatusCreated, nil)
+		http.Redirect(w, r, "/homepage", http.StatusMovedPermanently)
 	default:
 		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
 	}
@@ -110,10 +110,20 @@ const signinForm = `
 <html>
   <body>
     <h1>Signin</h1>
-    <form action="/" method="post" accept-charset="utf-8">
-      <input type="text" name="aut" value="Author's Name: " id="aut">
-      <input type="text" name="quo" value="Type a string..." id="quo">
-      <input type="submit" value="Submit Quote">
+    <form action="/signin" method="post">
+      <p>
+        <label for="name">Name:</label>
+        <input id="name" type="text" name="name">
+      </p>
+      <p>
+        <label for="username">Username:</label>
+        <input id="username" type="text" name="username">
+      </p>
+      <p>
+        <label for="password">Password:</label>
+        <input in="password" type="text" name="password">
+      </p>
+        <input value="Submit" type="submit">
     </form>
   </body>
 </html>

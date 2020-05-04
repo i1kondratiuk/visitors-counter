@@ -32,7 +32,7 @@ func (r *UserRepositoryImpl) GetById(id int64) (*entity.User, error) {
 		return nil, err
 	}
 	user := &entity.User{}
-	err = row.Scan(&user.ID, &user.Name)
+	err = row.Scan(&user.Id, &user.Name)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
@@ -50,7 +50,7 @@ func (r *UserRepositoryImpl) GetByUsername(username string) (*entity.User, error
 		return nil, err
 	}
 	user := &entity.User{}
-	err = row.Scan(&user.ID, &user.Name)
+	err = row.Scan(&user.Id, &user.Name)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
@@ -62,20 +62,23 @@ func (r *UserRepositoryImpl) GetAll() ([]*entity.User, error) {
 	if r.db == nil {
 		return nil, errors.New("database error")
 	}
-	rows, err := r.db.Query("select id, name from users")
+	rows, err := r.db.Query("SELECT id, name FROM user")
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
+
 	users := make([]*entity.User, 0)
 	for rows.Next() {
 		user := &entity.User{}
-		err = rows.Scan(&user.ID, &user.Name)
+		err = rows.Scan(&user.Id, &user.Name)
 		if err != nil {
 			return nil, err
 		}
 		users = append(users, user)
 	}
+
 	return users, nil
 }
 
