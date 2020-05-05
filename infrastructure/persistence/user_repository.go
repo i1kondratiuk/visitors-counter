@@ -67,8 +67,6 @@ func (r *UserRepositoryImpl) GetAll() ([]*entity.User, error) {
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	users := make([]*entity.User, 0)
 	for rows.Next() {
 		user := &entity.User{}
@@ -90,8 +88,6 @@ func (r *UserRepositoryImpl) Save(user *entity.User) error {
 	if r.db == nil {
 		return errors.New("database error")
 	}
-
-	defer r.db.Close()
 
 	_, err := r.db.Query("insert into user (name) values (?)")
 	if err != nil {
