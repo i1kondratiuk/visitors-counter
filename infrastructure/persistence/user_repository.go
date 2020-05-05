@@ -27,7 +27,7 @@ func (r *UserRepositoryImpl) GetById(id int64) (*entity.User, error) {
 		return nil, errors.New("database error")
 	}
 
-	row, err := r.db.Query("select id, name from users where id=?", id)
+	row, err := r.db.Query("select id, name from user where id=?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (r *UserRepositoryImpl) GetByUsername(username string) (*entity.User, error
 		return nil, errors.New("database error")
 	}
 
-	row, err := r.db.Query("select id, name from users where username=?", username)
+	row, err := r.db.Query("select id, name from user where username=?", username)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (r *UserRepositoryImpl) Save(user *entity.User) error {
 
 	defer r.db.Close()
 
-	_, err := r.db.Query("insert into users (name) values (?)")
+	_, err := r.db.Query("insert into user (name) values (?)")
 	if err != nil {
 		return err
 	}

@@ -39,7 +39,7 @@ func (r *AuthRepositoryImpl) Insert(user *entity.User) error {
 	}
 
 	insertedUser, err := r.db.Query(
-		"INSERT INTO user (name, username, password) VALUES (?, ?, ?)",
+		"insert into user (name, username, password) values (?, ?, ?)",
 		user.Name,
 		user.Credentials.Username,
 		user.Credentials.Password)
