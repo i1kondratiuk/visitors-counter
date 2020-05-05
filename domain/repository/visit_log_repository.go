@@ -7,8 +7,8 @@ import (
 
 // VisitLogRepository represents a storage of all visit logs
 type VisitLogRepository interface {
-	RegisterVisit(visit value.Visit, username string) error
-	GetByTypeAndUsername(value.VisitType) ([]*entity.VisitLog, error)
+	RegisterVisit(visit value.Visit, username string) (*entity.VisitLog, error)
+	GetAllByTypeAndValue(visitType value.VisitType, visitValue string) ([]*entity.VisitLog, error)
 }
 
 var visitLogRepository VisitLogRepository

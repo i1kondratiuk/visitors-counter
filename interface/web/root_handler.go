@@ -13,7 +13,7 @@ func Run(port int) {
 	http.HandleFunc("/", root)
 
 	new(AuthHandler).AddRoutes()
-	new(UserCounterHandler).AddRoutes()
+	new(VisitLogAppHandler).AddRoutes()
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }

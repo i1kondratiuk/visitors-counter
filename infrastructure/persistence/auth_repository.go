@@ -3,7 +3,6 @@ package persistence
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/i1kondratiuk/visitors-counter/domain/entity"
 	"github.com/i1kondratiuk/visitors-counter/domain/repository"
@@ -54,7 +53,7 @@ func (r *AuthRepositoryImpl) Insert(user *entity.User) error {
 		return errors.New("database error")
 	}
 
-	insertedUser, err := r.db.Query(
+	_, err := r.db.Query(
 		"insert into user (name, username, password) values (?, ?, ?)",
 		user.Name,
 		user.Credentials.Username,

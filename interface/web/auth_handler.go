@@ -90,6 +90,7 @@ func (h AuthHandler) Signin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		h.AuthApp = application.GetAuthApp()
 		err := h.AuthApp.Signin(credentials)
 
 		if err != nil {

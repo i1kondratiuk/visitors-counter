@@ -38,6 +38,7 @@ func init() {
 
 	repository.InitAuthRepository(persistence.NewAuthRepository(db))
 	repository.InitUserRepository(persistence.NewUserRepository(db))
+	repository.InitVisitLogRepository(persistence.NewVisitLogRepository(db))
 
 	if err != nil {
 		panic(err.Error())
@@ -46,7 +47,7 @@ func init() {
 
 func main() {
 	application.InitAuthApp(&application.AuthAppImpl{})
-	application.InitUsersCounterApp(&application.UsersCounterAppImpl{})
+	application.InitVisitLogApp(&application.VisitLogAppImpl{})
 
 	service.InitAuthService(&service.AuthServiceImpl{})
 

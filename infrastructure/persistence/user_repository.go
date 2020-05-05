@@ -62,7 +62,9 @@ func (r *UserRepositoryImpl) GetAll() ([]*entity.User, error) {
 	if r.db == nil {
 		return nil, errors.New("database error")
 	}
+
 	rows, err := r.db.Query("SELECT id, name FROM user")
+
 	if err != nil {
 		return nil, err
 	}

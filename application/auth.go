@@ -12,6 +12,7 @@ type AuthApp interface {
 	Signup(*entity.User) error
 	Signin(*value.Credentials) error
 	Authorized() bool
+	GetCurrentUser() *entity.User
 }
 
 // AuthImplImpl is the implementation of AuthImpl
@@ -23,6 +24,7 @@ var _ AuthApp = &AuthAppImpl{}
 var authApp AuthApp
 
 var authorized = false
+var currentUser *entity.User
 
 // InitAuthApp injects implementation for AuthApp application
 func InitAuthApp(a AuthApp) {
@@ -59,9 +61,21 @@ func (a *AuthAppImpl) Signin(credentials *value.Credentials) error {
 
 	authorized = true
 
+	storedUser, err := repository.GetUserRepository().GetByUsername(credentials.Username)
+
+	if err != nil {
+		return err
+	}
+
+	currentUser = storedUser
+
 	return nil
 }
 
 func (a *AuthAppImpl) Authorized() bool {
 	return authorized
+}
+
+func (a *AuthAppImpl) GetCurrentUser() *entity.User {
+	return currentUser
 }
