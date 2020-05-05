@@ -9,6 +9,7 @@ import (
 	"github.com/i1kondratiuk/visitors-counter/application"
 	"github.com/i1kondratiuk/visitors-counter/config"
 	"github.com/i1kondratiuk/visitors-counter/domain/repository"
+	"github.com/i1kondratiuk/visitors-counter/domain/service"
 	"github.com/i1kondratiuk/visitors-counter/infrastructure/persistence"
 	"github.com/i1kondratiuk/visitors-counter/interface/web"
 )
@@ -47,7 +48,7 @@ func main() {
 	application.InitAuthApp(&application.AuthAppImpl{})
 	application.InitUsersCounterApp(&application.UsersCounterAppImpl{})
 
-	web.Run(8080)
+	service.InitAuthService(&service.AuthServiceImpl{})
 
-	// defer db.Close()
+	web.Run(8080)
 }

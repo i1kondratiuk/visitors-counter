@@ -1,7 +1,6 @@
 package web
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -28,34 +27,28 @@ func (h AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, signupForm)
 	case "POST":
 
-		name := r.FormValue("name")
-		username := r.FormValue("username")
-		password := r.FormValue("password")
-		fmt.Println(">>> name: ", name)
-		fmt.Println(">>> username: ", username)
-		fmt.Println(">>> password: ", password)
-
-		if name == "" || username == "" || password == "" {
-			Error(w, http.StatusBadRequest, errors.New("empty input"), "all fields should bu populated")
-			return
-		}
 		u := entity.User{
-			Name: name,
+			Name: r.FormValue("name"),
 			Credentials: value.Credentials{
-				Username: username,
-				Password: password,
+				Username: r.FormValue("username"),
+				Password: r.FormValue("password"),
 			},
+		}
+
+		if u.Name == "" || u.Credentials.Username == "" || u.Credentials.Password == "" {
+			Error(w, http.StatusBadRequest, errors.New("empty input"), "all fields should be populated")
+			return
 		}
 
 		h.AuthApp = application.GetAuthApp()
 		if err := h.AuthApp.Signup(&u); err != nil {
-			Error(w, http.StatusInternalServerError, err, "failed to create user")
+			Error(w, http.StatusInternalServerError, err, "failed to create the user")
 			return
 		}
 
 		http.Redirect(w, r, "/homepage", http.StatusMovedPermanently)
 	default:
-		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
+		fmt.Fprintf(w, "only GET and POST methods are supported")
 	}
 }
 
@@ -87,22 +80,26 @@ func (h AuthHandler) Signin(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		fmt.Fprint(w, signinForm)
 	case "POST":
-		var c value.Credentials
-		if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
-			Error(w, http.StatusBadRequest, err, "failed to parse request")
+		credentials := &value.Credentials{
+			Username: r.FormValue("username"),
+			Password: r.FormValue("password"),
+		}
+
+		if credentials.Username == "" || credentials.Password == "" {
+			Error(w, http.StatusBadRequest, errors.New("empty input"), "all fields should be populated")
 			return
 		}
 
-		u, err := h.AuthApp.Signin(&c)
+		err := h.AuthApp.Signin(credentials)
 
 		if err != nil {
 			Error(w, http.StatusNotFound, err, "failed to signin")
 			return
 		}
 
-		JSON(w, http.StatusOK, u)
+		http.Redirect(w, r, "/homepage", http.StatusMovedPermanently)
 	default:
-		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
+		fmt.Fprintf(w, "only GET and POST methods are supported")
 	}
 }
 

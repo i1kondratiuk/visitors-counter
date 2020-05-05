@@ -10,7 +10,8 @@ import (
 // AuthApp...
 type AuthApp interface {
 	Signup(*entity.User) error
-	Signin(*value.Credentials) (*entity.User, error)
+	Signin(*value.Credentials) error
+	Authorized() bool
 }
 
 // AuthImplImpl is the implementation of AuthImpl
@@ -20,6 +21,8 @@ type AuthAppImpl struct{}
 var _ AuthApp = &AuthAppImpl{}
 
 var authApp AuthApp
+
+var authorized = false
 
 // InitAuthApp injects implementation for AuthApp application
 func InitAuthApp(a AuthApp) {
@@ -43,12 +46,22 @@ func (a *AuthAppImpl) Signup(user *entity.User) error {
 }
 
 // Signin checks for credentials to match
-func (a *AuthAppImpl) Signin(c *value.Credentials) (*entity.User, error) {
-	u, err := service.GetAuthService().FindMatch(c)
+func (a *AuthAppImpl) Signin(credentials *value.Credentials) error {
+	storedCredentials, err := repository.GetAuthRepository().GetCredentials(credentials.Username)
 
-	if err == nil {
-		return nil, err
+	if err != nil {
+		return err
 	}
 
-	return u, nil
+	if err := service.GetAuthService().ComparePassword(&storedCredentials.Password, &credentials.Password); err != nil {
+		return err
+	}
+
+	authorized = true
+
+	return nil
+}
+
+func (a *AuthAppImpl) Authorized() bool {
+	return authorized
 }
