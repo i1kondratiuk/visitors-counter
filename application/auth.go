@@ -44,6 +44,10 @@ func (a *AuthAppImpl) Signup(user *entity.User) error {
 		panic(err.Error())
 	}
 
+	authorized = true
+
+	currentUser = user
+
 	return nil
 }
 

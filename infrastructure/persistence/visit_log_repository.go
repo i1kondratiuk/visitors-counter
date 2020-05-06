@@ -26,7 +26,8 @@ func (r VisitLogRepositoryImpl) GetVisit(visit *value.Visit, username string) (*
 	if r.db == nil {
 		return nil, errors.New("database error")
 	}
-	row, err := r.db.Query(
+
+	rows, err := r.db.Query(
 		"select id, counter from visit_log where username = ? and type = ? and value = ? limit 1",
 		username,
 		visit.Type,
@@ -37,18 +38,28 @@ func (r VisitLogRepositoryImpl) GetVisit(visit *value.Visit, username string) (*
 		return nil, err
 	}
 
-	visitLogRecord := &entity.VisitLog{}
-	row.Next()
-	err = row.Scan(&visitLogRecord.Id, &visitLogRecord.Counter)
-	if err != nil {
-		return nil, err
+	visitLogRecords := make([]*entity.VisitLog, 0)
+	for rows.Next() {
+		visitLogRecord := &entity.VisitLog{}
+		err = rows.Scan(
+			&visitLogRecord.Id,
+			&visitLogRecord.Counter,
+		)
+		if err != nil {
+			return nil, err
+		}
+		visitLogRecords = append(visitLogRecords, visitLogRecord)
 	}
 
-	return visitLogRecord, nil
+	if len(visitLogRecords) == 0 {
+		return nil, nil
+	}
+
+	return visitLogRecords[0], nil
 }
 
 func (r VisitLogRepositoryImpl) InsertVisit(log *entity.VisitLog) (*entity.VisitLog, error) {
-	insertedRow, err := r.db.Query(
+	_, err := r.db.Query(
 		"insert into visit_log (username, type, value, counter) values (?, ?, ?, ?)",
 		log.Username,
 		log.Visit.Type,
@@ -56,13 +67,6 @@ func (r VisitLogRepositoryImpl) InsertVisit(log *entity.VisitLog) (*entity.Visit
 		log.Counter,
 	)
 
-	if err != nil {
-		panic(err)
-		return nil, err
-	}
-
-	insertedRow.Next()
-	err = insertedRow.Scan(&log.Id)
 	if err != nil {
 		panic(err)
 		return nil, err
@@ -85,7 +89,7 @@ func (r VisitLogRepositoryImpl) GetAllByTypeAndValue(visitType *value.VisitType,
 		return nil, errors.New("database error")
 	}
 
-	rows, err := r.db.Query("select id, username, counter, type, value from visit_log where type = ? and value = ?", *visitType, visitValue)
+	rows, err := r.db.Query("select id, username, counter, type, value from visit_log where type = ? and value = ?", visitType, visitValue)
 
 	if err != nil {
 		return nil, err

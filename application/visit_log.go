@@ -1,8 +1,6 @@
 package application
 
 import (
-	"database/sql"
-
 	"github.com/i1kondratiuk/visitors-counter/domain/entity"
 	"github.com/i1kondratiuk/visitors-counter/domain/repository"
 	"github.com/i1kondratiuk/visitors-counter/domain/value"
@@ -35,28 +33,23 @@ var _ VisitLogApp = &VisitLogAppImpl{}
 func (a *VisitLogAppImpl) RegisterVisit(visit *value.Visit, username string) error {
 	storedVisit, err := repository.GetVisitLogRepository().GetVisit(visit, username)
 
-	if err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			_, err = repository.GetVisitLogRepository().InsertVisit(
-				&entity.VisitLog{
-					Username: username,
-					Visit: *visit,
-					Counter: 1,
-				},
-			)
-			if err != nil {
-				return err
-			}
-		default:
+	if storedVisit == nil {
+		_, err = repository.GetVisitLogRepository().InsertVisit(
+			&entity.VisitLog{
+				Username: username,
+				Visit: *visit,
+				Counter: 1,
+			},
+		)
+		if err != nil {
 			return err
 		}
-	}
-
-	storedVisit.Counter += 1
-	_, err = repository.GetVisitLogRepository().UpdateVisit(storedVisit)
-	if err != nil {
-		return err
+	} else {
+		storedVisit.Counter += 1
+		_, err = repository.GetVisitLogRepository().UpdateVisit(storedVisit)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
