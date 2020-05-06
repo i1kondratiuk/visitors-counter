@@ -1,14 +1,17 @@
 package application
 
 import (
+	"database/sql"
+
+	"github.com/i1kondratiuk/visitors-counter/domain/entity"
 	"github.com/i1kondratiuk/visitors-counter/domain/repository"
 	"github.com/i1kondratiuk/visitors-counter/domain/value"
 )
 
 // VisitLogApp represents VisitLogApp application to be called by interface layer
 type VisitLogApp interface {
-	RegisterVisit(visit value.Visit, username string) error
-	GetNumberOfUsersVisitedPage(visit value.Visit) (int, error)
+	RegisterVisit(visit *value.Visit, username string) error
+	GetNumberOfUsersVisitedPage(visit *value.Visit) (int, error)
 }
 
 // VisitLogAppImpl is the implementation of UsersCounter
@@ -29,9 +32,29 @@ func GetVisitLogApp() VisitLogApp {
 // VisitLogAppImpl implements the VisitLogApp interface
 var _ VisitLogApp = &VisitLogAppImpl{}
 
-func (a *VisitLogAppImpl) RegisterVisit(visit value.Visit, username string) error {
-	_, err := repository.GetVisitLogRepository().RegisterVisit(visit, username)
+func (a *VisitLogAppImpl) RegisterVisit(visit *value.Visit, username string) error {
+	storedVisit, err := repository.GetVisitLogRepository().GetVisit(visit, username)
 
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			_, err = repository.GetVisitLogRepository().InsertVisit(
+				&entity.VisitLog{
+					Username: username,
+					Visit: *visit,
+					Counter: 1,
+				},
+			)
+			if err != nil {
+				return err
+			}
+		default:
+			return err
+		}
+	}
+
+	storedVisit.Counter += 1
+	_, err = repository.GetVisitLogRepository().UpdateVisit(storedVisit)
 	if err != nil {
 		return err
 	}
@@ -39,11 +62,11 @@ func (a *VisitLogAppImpl) RegisterVisit(visit value.Visit, username string) erro
 	return nil
 }
 
-func (a *VisitLogAppImpl) GetNumberOfUsersVisitedPage(visit value.Visit) (int, error) {
-	logs, err := repository.GetVisitLogRepository().GetAllByTypeAndValue(visit.Type, visit.Value)
+func (a *VisitLogAppImpl) GetNumberOfUsersVisitedPage(visit *value.Visit) (int, error) {
+	logs, err := repository.GetVisitLogRepository().GetAllByTypeAndValue(&visit.Type, visit.Value)
 
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
 	return len(logs), err

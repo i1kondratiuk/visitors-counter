@@ -24,20 +24,23 @@ func NewAuthRepository(db *sql.DB) repository.AuthRepository {
 
 // Save saves domain.User to storage
 func (r *AuthRepositoryImpl) GetCredentials(username string) (*value.Credentials, error) {
-	storedCredentials := &value.Credentials{
-		Username: username,
+	storedCredentials := &value.Credentials{}
+	rows, err := r.db.Query("select username, password from user where username = ? limit 1", username)
+	if rows == nil {
+		return nil, errors.New("no records found")
 	}
-
-	result, err := r.db.Query("select password from user where username = ? limit 1", username)
-
 	if err != nil {
 		return nil, errors.New("no records found")
 	}
 
-	err = result.Scan(&storedCredentials.Password)
+	rows.Next()
+	err = rows.Scan(
+		&storedCredentials.Username,
+		&storedCredentials.Password,
+	)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("no user with such username found")
 	}
 
 	return storedCredentials, nil

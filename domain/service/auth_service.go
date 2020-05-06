@@ -26,7 +26,7 @@ func InitAuthService(a AuthService) {
 
 // FindMatch finds a match for a user based on its Credentials
 func (a *AuthServiceImpl) ComparePassword(storedPassword *string, password *string)  error {
-	if storedPassword != password {
+	if *storedPassword != *password {
 		return errors.New("incorrect password")
 	}
 

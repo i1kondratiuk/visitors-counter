@@ -58,7 +58,6 @@ func (a *AuthAppImpl) Signin(credentials *value.Credentials) error {
 	if err := service.GetAuthService().ComparePassword(&storedCredentials.Password, &credentials.Password); err != nil {
 		return err
 	}
-
 	authorized = true
 
 	storedUser, err := repository.GetUserRepository().GetByUsername(credentials.Username)

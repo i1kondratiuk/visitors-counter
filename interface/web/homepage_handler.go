@@ -22,7 +22,7 @@ func (h VisitLogAppHandler) getNumberOfVisits(w http.ResponseWriter, r *http.Req
 	h.AuthApp = application.GetAuthApp()
 	h.VisitLogApp = application.GetVisitLogApp()
 
-	currentVisit := value.Visit{
+	currentVisit := &value.Visit{
 		Type:  value.ResourcePath,
 		Value: "homepage",
 	}
@@ -30,14 +30,14 @@ func (h VisitLogAppHandler) getNumberOfVisits(w http.ResponseWriter, r *http.Req
 	err := h.VisitLogApp.RegisterVisit(currentVisit, h.AuthApp.GetCurrentUser().Credentials.Username)
 
 	if err != nil {
-		Error(w, http.StatusNotFound, err, "failed to log the visit")
+		Error(w, http.StatusNotFound, err, "failed to log the visit; "+err.Error())
 		return
 	}
 
 	uniqueVisitsNumber, err := h.VisitLogApp.GetNumberOfUsersVisitedPage(currentVisit)
 
 	if err != nil {
-		Error(w, http.StatusNotFound, err, "failed to get visit log records")
+		Error(w, http.StatusNotFound, err, "failed to get visit log records; "+err.Error())
 		return
 	}
 

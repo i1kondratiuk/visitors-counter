@@ -94,7 +94,7 @@ func (h AuthHandler) Signin(w http.ResponseWriter, r *http.Request) {
 		err := h.AuthApp.Signin(credentials)
 
 		if err != nil {
-			Error(w, http.StatusNotFound, err, "failed to signin")
+			Error(w, http.StatusNotFound, err, "failed to signin; "+err.Error())
 			return
 		}
 
@@ -109,10 +109,6 @@ const signinForm = `
   <body>
     <h1>Signin</h1>
     <form action="/signin" method="post">
-      <p>
-        <label for="name">Name:</label>
-        <input id="name" type="text" name="name">
-      </p>
       <p>
         <label for="username">Username:</label>
         <input id="username" type="text" name="username">

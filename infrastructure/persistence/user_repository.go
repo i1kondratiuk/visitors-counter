@@ -6,6 +6,7 @@ import (
 
 	"github.com/i1kondratiuk/visitors-counter/domain/entity"
 	"github.com/i1kondratiuk/visitors-counter/domain/repository"
+	"github.com/i1kondratiuk/visitors-counter/domain/value"
 )
 
 // UserRepositoryImpl is the implementation of UserRepository
@@ -45,15 +46,18 @@ func (r *UserRepositoryImpl) GetByUsername(username string) (*entity.User, error
 		return nil, errors.New("database error")
 	}
 
-	row, err := r.db.Query("select id, name from user where username=?", username)
+	rows, err := r.db.Query("select id, name from user where username=?", username)
 	if err != nil {
 		return nil, err
 	}
-	user := &entity.User{}
-	err = row.Scan(&user.Id, &user.Name)
+
+	user := &entity.User{Credentials: value.Credentials{Username: username}}
+	rows.Next()
+	err = rows.Scan(&user.Id, &user.Name)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
+
 	return user, nil
 }
 
