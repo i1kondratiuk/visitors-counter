@@ -44,9 +44,9 @@ func (h VisitLogAppHandler) getNumberOfVisits(w http.ResponseWriter, r *http.Req
 	}
 
 	result := fmt.Sprintf(
-		"Total number of visits: %d\nTotal number of unique visitors: %d",
-		uniqueVisitsNumber,
+		"Total number of visits: %d\nNumber of unique visitors: %d",
 		totalVisitsNumber,
+		uniqueVisitsNumber,
 	)
 
 	JSON(w, http.StatusOK, result)
