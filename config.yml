@@ -1,7 +1,7 @@
 database:
   driver: mysql
   host: localhost
-  name: finres-db
+  name: visitors-counter-db
   port: 3306
   user: root
-  password:
+  password: root
