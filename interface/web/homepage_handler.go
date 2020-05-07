@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/i1kondratiuk/visitors-counter/application"
@@ -35,11 +36,18 @@ func (h VisitLogAppHandler) getNumberOfVisits(w http.ResponseWriter, r *http.Req
 	}
 
 	uniqueVisitsNumber, err := h.VisitLogApp.GetNumberOfUsersVisitedPage(currentVisit)
+	totalVisitsNumber, err := h.VisitLogApp.GetTotalVisitsNumber(currentVisit)
 
 	if err != nil {
 		Error(w, http.StatusNotFound, err, "failed to get visit log records; "+err.Error())
 		return
 	}
 
-	JSON(w, http.StatusOK, uniqueVisitsNumber)
+	result := fmt.Sprintf(
+		"Total number of visits: %d\nTotal number of unique visitors: %d",
+		uniqueVisitsNumber,
+		totalVisitsNumber,
+	)
+
+	JSON(w, http.StatusOK, result)
 }

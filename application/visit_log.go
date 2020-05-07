@@ -10,6 +10,7 @@ import (
 type VisitLogApp interface {
 	RegisterVisit(visit *value.Visit, username string) error
 	GetNumberOfUsersVisitedPage(visit *value.Visit) (int, error)
+	GetTotalVisitsNumber(visit *value.Visit) (int, error)
 }
 
 // VisitLogAppImpl is the implementation of UsersCounter
@@ -37,8 +38,8 @@ func (a *VisitLogAppImpl) RegisterVisit(visit *value.Visit, username string) err
 		_, err = repository.GetVisitLogRepository().InsertVisit(
 			&entity.VisitLog{
 				Username: username,
-				Visit: *visit,
-				Counter: 1,
+				Visit:    *visit,
+				Counter:  1,
 			},
 		)
 		if err != nil {
@@ -63,4 +64,20 @@ func (a *VisitLogAppImpl) GetNumberOfUsersVisitedPage(visit *value.Visit) (int, 
 	}
 
 	return len(logs), err
+}
+
+func (a *VisitLogAppImpl) GetTotalVisitsNumber(visit *value.Visit) (int, error) {
+	logs, err := repository.GetVisitLogRepository().GetAllByTypeAndValue(&visit.Type, visit.Value)
+
+	if err != nil {
+		panic(err)
+	}
+
+	totalVisits := 0
+
+	for _, log := range logs {
+		totalVisits += log.Counter
+	}
+
+	return totalVisits, err
 }
