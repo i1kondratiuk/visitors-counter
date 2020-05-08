@@ -1,43 +1,37 @@
 version: "3.3"
 
 services:
-  app-container:
-    container_name: go-app
+  visitors-counter-app-container:
+    container_name: visitors-counter-app
     build: .
     ports:
-      - 4040:4040
+      - 8080:8080
     restart: always
-    command: sh -c "/wait && /app/visitors-counter"
-    environment:
-      - WAIT_HOSTS=${DB_HOST}:3306
-      - WAIT_HOSTS_TIMEOUT=300
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
+    command: sh -c "/app/visitors-counter"
     depends_on:
-      - db-container
+      - visitors-counter-db-container
 
-  db-container:
-    image: mysql:8.0.19
-    container_name: mysql-db
-    command: --default-authentication-plugin=mysql_native_password
+  visitors-counter-db-container:
+    image: mysql:5.7
+    container_name: visitors-counter-db
     restart: always
+    command: --init-file /init.sql
     ports:
       - 3306:3306
     environment:
-      MYSQL_ROOT_HOST: ${DB_HOST}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - db-data:/var/lib/mysql
+      - ./_sql/init.sql:/init.sql
 
-  adminer-container:
+  visitors-counter-adminer-container:
     image: adminer
-    container_name: mysql-db-adminer
+    container_name: visitors-counter-adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8081:8080
     depends_on:
-      - db-container
+      - visitors-counter-db-container
 
 volumes:
   db-data:

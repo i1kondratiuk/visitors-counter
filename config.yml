@@ -1,7 +1,7 @@
 database:
   driver: mysql
-  host: localhost
-  name: visitors-counter-db
+  host: visitors-counter-db-container
+  name: vc
   port: 3306
   user: root
-  password: root
+  password: password
