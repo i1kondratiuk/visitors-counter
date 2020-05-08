@@ -20,12 +20,7 @@ COPY config.yml /app/
 RUN go build -o /app/visitors-counter .
 
 # This container exposes port 8080 to the outside world
-EXPOSE 4040
-
-# Add docker-compose-wait tool
-ENV WAIT_VERSION 2.7.2
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
-RUN chmod +x /wait
+EXPOSE 8080
 
 # Run the binary program produced by `go build`
 CMD /app/visitors-counter
