@@ -1,0 +1,37 @@
+version: "3.3"
+
+services:
+  visitors-counter-app-container:
+    container_name: visitors-counter-app
+    build: .
+    ports:
+      - 8080:8080
+    restart: always
+    command: sh -c "/app/visitors-counter"
+    depends_on:
+      - visitors-counter-db-container
+
+  visitors-counter-db-container:
+    image: mysql:5.7
+    container_name: visitors-counter-db
+    restart: always
+    command: --init-file /init.sql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./_sql/init.sql:/init.sql
+
+  visitors-counter-adminer-container:
+    image: adminer
+    container_name: visitors-counter-adminer
+    restart: always
+    ports:
+      - 8081:8080
+    depends_on:
+      - visitors-counter-db-container
+
+volumes:
+  db-data:
